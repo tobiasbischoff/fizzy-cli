@@ -10,6 +10,12 @@ A fast, human-friendly CLI for the Fizzy kanban board. Manage boards, cards, com
 - Works on macOS and Linux (single Go binary)
 
 ## Install
+Install with Homebrew:
+
+```bash
+brew install tobiasbischoff/tap/fizzy-cli
+```
+
 Build from source:
 
 ```bash
