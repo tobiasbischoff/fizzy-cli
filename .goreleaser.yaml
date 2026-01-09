@@ -1,0 +1,49 @@
+version: 2
+project_name: fizzy-cli
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: fizzy-cli
+    main: ./cmd/fizzy-cli
+    binary: fizzy-cli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+
+checksum:
+  name_template: "checksums.txt"
+
+brews:
+  - name: fizzy-cli
+    homepage: https://github.com/tobiasbischoff/fizzy-cli
+    description: CLI for the Fizzy kanban board.
+    repository:
+      owner: tobiasbischoff
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.GORELEASER_TOKEN }}"
+    directory: Formula
+    test: |
+      system "#{bin}/fizzy-cli", "--help"
+
+release:
+  github:
+    owner: tobiasbischoff
+    name: fizzy-cli
