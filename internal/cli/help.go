@@ -1,0 +1,189 @@
+package cli
+
+import "fmt"
+
+const rootHelp = `fizzy-cli - CLI for the Fizzy kanban board
+
+USAGE:
+  fizzy-cli [global flags] <command> [args]
+
+EXAMPLES:
+  fizzy-cli auth login --token $FIZZY_TOKEN
+  fizzy-cli account list
+  fizzy-cli account set 897362094
+  fizzy-cli board list
+  fizzy-cli card list --board-id 03f5v9zkft4hj9qq0lsn9ohcm
+  fizzy-cli card create --board-id 03f5v9zkft4hj9qq0lsn9ohcm --title "Add dark mode" --description "Switch theme"
+  fizzy-cli comment list 4
+  fizzy-cli notification list --unread
+
+COMMANDS:
+  auth              Manage authentication
+  account           Account selection and identity info
+  config            Manage persisted defaults
+  board             Manage boards
+  card              Manage cards
+  comment           Manage card comments
+  tag               List tags
+  column            Manage columns
+  user              Manage users
+  notification      Manage notifications
+  help              Show help for a command
+
+GLOBAL FLAGS:
+  --base-url string   API base URL (env: FIZZY_BASE_URL, default: https://app.fizzy.do)
+  --token string      Personal access token (env: FIZZY_TOKEN)
+  --account string    Account slug (env: FIZZY_ACCOUNT)
+  --config string     Config file path (env: FIZZY_CONFIG)
+  --json              JSON output
+  --plain             Plain, line-oriented output
+  --no-color          Disable color (respects NO_COLOR by default)
+  -h, --help          Show help
+  --version           Print version
+`
+
+func helpForAuth() string {
+	return `USAGE:
+  fizzy-cli auth login [--token TOKEN]
+  fizzy-cli auth login --email user@example.com [--code ABC123]
+  fizzy-cli auth logout
+  fizzy-cli auth status
+
+FLAGS:
+  --token string   Personal access token (reads from stdin or prompt if omitted)
+  --email string   Email address for magic-link login
+  --code string    Magic-link code (required if not running in a TTY)
+`
+}
+
+func helpForAccount() string {
+	return `USAGE:
+  fizzy-cli account list
+  fizzy-cli account set <account-slug>
+
+NOTES:
+  Account slugs can be provided with or without a leading slash.
+`
+}
+
+func helpForConfig() string {
+	return `USAGE:
+  fizzy-cli config show
+  fizzy-cli config set [--base-url URL] [--account SLUG]
+`
+}
+
+func helpForBoard() string {
+	return `USAGE:
+  fizzy-cli board list
+  fizzy-cli board get <board-id>
+  fizzy-cli board create --name <name> [--all-access] [--auto-postpone-days N] [--public-description TEXT]
+  fizzy-cli board update <board-id> [--name <name>] [--all-access] [--no-all-access] [--auto-postpone-days N] [--public-description TEXT] [--user-id ID ...]
+  fizzy-cli board delete <board-id>
+`
+}
+
+func helpForCard() string {
+	return `USAGE:
+  fizzy-cli card list [filters]
+  fizzy-cli card get <card-number>
+  fizzy-cli card create --board-id <board-id> --title <title> [--description TEXT] [--status drafted|published] [--tag-id ID ...] [--image PATH]
+  fizzy-cli card update <card-number> [--title TEXT] [--description TEXT] [--status drafted|published] [--tag-id ID ...] [--image PATH]
+  fizzy-cli card delete <card-number>
+  fizzy-cli card close <card-number>
+  fizzy-cli card reopen <card-number>
+  fizzy-cli card not-now <card-number>
+  fizzy-cli card triage <card-number> --column-id <column-id>
+  fizzy-cli card untriage <card-number>
+  fizzy-cli card tag <card-number> --title <tag-title>
+  fizzy-cli card assign <card-number> --assignee-id <user-id>
+  fizzy-cli card watch <card-number>
+  fizzy-cli card unwatch <card-number>
+
+FILTERS:
+  --board-id ID           repeatable
+  --tag-id ID             repeatable
+  --assignee-id ID        repeatable
+  --creator-id ID         repeatable
+  --closer-id ID          repeatable
+  --card-id ID            repeatable
+  --indexed-by VALUE      all|closed|not_now|stalled|postponing_soon|golden
+  --sorted-by VALUE       latest|newest|oldest
+  --assignment-status     unassigned
+  --creation VALUE        today|yesterday|thisweek|lastweek|thismonth|lastmonth|thisyear|lastyear
+  --closure VALUE         today|yesterday|thisweek|lastweek|thismonth|lastmonth|thisyear|lastyear
+  --term VALUE            repeatable search terms
+  --all                   follow pagination
+`
+}
+
+func helpForComment() string {
+	return `USAGE:
+  fizzy-cli comment list <card-number>
+  fizzy-cli comment get <card-number> <comment-id>
+  fizzy-cli comment create <card-number> --body <text>
+  fizzy-cli comment update <card-number> <comment-id> --body <text>
+  fizzy-cli comment delete <card-number> <comment-id>
+`
+}
+
+func helpForTag() string {
+	return `USAGE:
+  fizzy-cli tag list
+`
+}
+
+func helpForColumn() string {
+	return `USAGE:
+  fizzy-cli column list --board-id <board-id>
+  fizzy-cli column get --board-id <board-id> <column-id>
+  fizzy-cli column create --board-id <board-id> --name <name> [--color <color>]
+  fizzy-cli column update --board-id <board-id> <column-id> [--name <name>] [--color <color>]
+  fizzy-cli column delete --board-id <board-id> <column-id>
+`
+}
+
+func helpForUser() string {
+	return `USAGE:
+  fizzy-cli user list
+  fizzy-cli user get <user-id>
+  fizzy-cli user update <user-id> [--name <name>] [--avatar PATH]
+  fizzy-cli user deactivate <user-id>
+`
+}
+
+func helpForNotification() string {
+	return `USAGE:
+  fizzy-cli notification list [--unread]
+  fizzy-cli notification read <notification-id>
+  fizzy-cli notification unread <notification-id>
+  fizzy-cli notification read-all
+`
+}
+
+func helpForCommand(cmd string) string {
+	switch cmd {
+	case "auth":
+		return helpForAuth()
+	case "account":
+		return helpForAccount()
+	case "config":
+		return helpForConfig()
+	case "board":
+		return helpForBoard()
+	case "card":
+		return helpForCard()
+	case "comment":
+		return helpForComment()
+	case "tag":
+		return helpForTag()
+	case "column":
+		return helpForColumn()
+	case "user":
+		return helpForUser()
+	case "notification":
+		return helpForNotification()
+	default:
+		return fmt.Sprintf("Unknown command %q.\n\n%s", cmd, rootHelp)
+	}
+}

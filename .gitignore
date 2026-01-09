@@ -1,0 +1,5 @@
+# Local build/test artifacts
+.gocache/
+
+# Local-only docs
+/docs/
